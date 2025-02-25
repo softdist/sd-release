@@ -1,0 +1,11 @@
+.config.location
+.config.yaml
+.sha
+.enc
+docker-bake.hcl
+Dockerfile*
+deno.lock
+extricate
+run
+install
+trusted_certs.pem

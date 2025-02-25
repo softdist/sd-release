@@ -1,0 +1,115 @@
+name: Release on Merge to Main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  bump-version-and-tag:
+    name: Bump Version and Create Tag
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.bump_version.outputs.new_tag }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for tagging
+
+      - name: Get Latest Tag
+        id: get_latest_tag
+        run: |
+          latest_tag=$(git describe --tags --abbrev=0 || echo "v0.0.0-0")
+          echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+
+      - name: Determine Version Bump Type
+        id: version_type
+        run: |
+          # Default to patch bump
+          bump_type="patch"
+          if [[ "${{ github.event.head_commit.message }}" =~ "#major" ]]; then
+            bump_type="major"
+          elif [[ "${{ github.event.head_commit.message }}" =~ "#minor" ]]; then
+            bump_type="minor"
+          fi
+          echo "Bumping version: $bump_type"
+          echo "bump_type=$bump_type" >> $GITHUB_ENV
+          echo "bump_type=$bump_type" >> $GITHUB_OUTPUT
+
+      - name: Bump Version
+        id: bump_version
+        run: |
+          latest_tag="${{ env.latest_tag }}"
+          IFS='.-' read -r -a parts <<< "${latest_tag#v}"
+          major=${parts[0]}
+          minor=${parts[1]}
+          patch=${parts[2]}
+          build=${parts[3]:-0}
+
+          case "${{ env.bump_type }}" in
+            major)
+              major=$((major + 1))
+              minor=0
+              patch=0
+              build=0
+              ;;
+            minor)
+              minor=$((minor + 1))
+              patch=0
+              build=0
+              ;;
+            patch)
+              patch=$((patch + 1))
+              build=0
+              ;;
+          esac
+
+          build=$((build + 1))  # Always increment build number
+          new_version="v$major.$minor.$patch-$build"
+          echo "New version: $new_version"
+          echo "new_tag=$new_version" >> $GITHUB_ENV
+          echo "new_tag=$new_version" >> $GITHUB_OUTPUT
+
+      - name: Create and Push Tag
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag "${{ env.new_tag }}"
+          git push origin "${{ env.new_tag }}"
+
+  docker-build:
+    name: Build and Push Docker Images
+    needs: bump-version-and-tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Registry
+        run: |
+          echo "${{ secrets.DOCKER_REGISTRY_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" --password-stdin
+
+      - name: Build Docker Images
+        run: make images
+
+      - name: Push Docker Images
+        run: make push
+
+  release:
+    name: Create GitHub Release
+    needs: [bump-version-and-tag, docker-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Release Container
+        run: |
+          docker run --rm -e CI=true \
+            -e THO_PAT_RELEASE=${{ secrets.THO_PAT_RELEASE }} \
+            -e THO_PAT_DECENC=${{ secrets.THO_PAT_DECENC }} \
+            -e VERSION=${{ needs.bump-version-and-tag.outputs.new_tag }} \
+            -e TITLE="Release ${{ needs.bump-version-and-tag.outputs.new_tag }}" \
+            --platform linux/amd64 \
+            lynsei/bin.release:latest

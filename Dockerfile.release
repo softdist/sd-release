@@ -1,0 +1,19 @@
+# Start from the deno image
+FROM lynsei/bin:latest AS assets
+
+FROM alpine:3.20 AS builder
+RUN mkdir -p /build/lib /app /etc/certs
+
+# Install the GitHub CLI (gh)
+RUN apk add \
+        --no-cache \
+        --no-check-certificate \
+        gzip bash github-cli
+
+# Set working directory
+WORKDIR /app
+COPY release.sh .
+COPY release-notes.md .
+COPY --from=assets /app/release.tar /app/release.tar
+
+ENTRYPOINT [ "bash", "/app/release.sh" ]
