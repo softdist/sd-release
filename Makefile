@@ -1,7 +1,7 @@
 # import config
 
-cnf ?= .env
 ifeq (,$(wildcard ".env"))
+	cnf ?= .env
 	include $(cnf)
 	export $(shell sed 's/=.*//' $(cnf))
 endif
