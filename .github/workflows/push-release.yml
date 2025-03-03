@@ -91,7 +91,11 @@ jobs:
           echo "${{ secrets.DOCKER_REGISTRY_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" --password-stdin
 
       - name: Build Docker Images
-        run: make images
+        run: |
+            make images
+        env:
+            TRUSTED_CERT: ${{ secrets.TRUSTED_CERT }}
+            LYNS_INSTALL_BUILD_NUM: ${{ env.new_tag }}
 
   release:
     name: Create GitHub Release
