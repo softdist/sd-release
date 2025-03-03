@@ -8,7 +8,12 @@ image="lynsei/run:latest"
 [[ -n "$THO_PAT_DECENC" && -n "$THO_PAT_RELEASE" ]] && b_noempty=true
 if [[ "$b_exists" && "$b_noempty" ]]; then
   echo "Running Release using THO_PAT_* ENV VARS (detected)..."
-  docker run --rm -it -e "THO_PAT_DECENC=$THO_PAT_DECENC" -e "THO_PAT_RELEASE=$THO_PAT_RELEASE" --platform linux/$mach $image
+  docker run --rm -it \
+  -e "THO_PAT_DECENC=$THO_PAT_DECENC" \
+  -e "THO_PAT_RELEASE=$THO_PAT_RELEASE" \
+  -e VERSION=$VERSION \
+  -e TITLE="Release $TITLE" \
+  --platform linux/$mach $image
 else
   if [ -f "$env_file" ] && [ -s "$env_file" ]; then
     echo "Running Release using .dockerenv file..."

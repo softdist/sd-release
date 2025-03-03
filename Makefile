@@ -13,6 +13,17 @@ help: ## Print all commands and help info
 
 .DEFAULT_GOAL := help
 
+bump-major:  ## Bump the major version tag
+	./bump_major.sh
+
+bump-minor:  ## Bump the minor version tag
+	./bump_minor.sh
+
+bump-patch:  ## Bump the patch version tag
+	./bump_patch.sh
+
+bump-build:  ## Bump the build version to a random build number
+	./bump_build.sh
 
 release:  ## Push latest release by running Release Image using .env vars
 	./docker_run.sh
@@ -20,6 +31,7 @@ release:  ## Push latest release by running Release Image using .env vars
 images: bake-bin-arm bake-bin-amd bake-release  ## Create Release and Binary Images
 
 push:  ## Push Images to the docker registry
+	./docker_push.sh
 
 bake-release:  ## Create Bake Release Image
 	./docker_bake_release.sh
