@@ -1,6 +1,6 @@
 # import config
 
-ifeq (,$(wildcard ".env"))
+ifeq ($(shell test -e .env),yes)
 	cnf ?= .env
 	include $(cnf)
 	export $(shell sed 's/=.*//' $(cnf))
@@ -37,10 +37,12 @@ bump-patch:  ## Bump the patch version tag
 bump-build:  ## Bump the build version to a random build number
 	./bump_build.sh
 
-release:  ## Push latest release by running Release Image using .env vars
+run_release:  ## Run release image locally
 	./docker_run.sh
 
-images: bake-bin-arm bake-bin-amd bake-release  ## Create Release and Binary Images
+build-push-bins: bake-bin-arm bake-bin-amd push  ## Bake and push binary images
+
+build-push-release: bake-release push  ## Bake and push release image
 
 push:  ## Push Images to the docker registry
 	./docker_push.sh

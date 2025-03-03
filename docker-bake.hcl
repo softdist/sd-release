@@ -30,7 +30,7 @@ target "bin-arm" {
     denocert = "${DENO_CERT}"
   }
   dockerfile = "Dockerfile.package"
-  tags = ["${REPO}/bin"]
+  tags = ["${REPO}/bin:latest"]
   no-cache = true
   platforms = ["linux/arm64"]
 }
@@ -46,7 +46,7 @@ target "bin-amd" {
     denocert = "${DENO_CERT}"
   }
   dockerfile = "Dockerfile.package"
-  tags = ["${REPO}/bin"]
+  tags = ["${REPO}/bin:latest"]
   no-cache = true
   platforms = ["linux/amd64"]
 }
