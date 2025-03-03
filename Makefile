@@ -1,7 +1,16 @@
 # import config
+
 cnf ?= .env
-include $(cnf)
-export $(shell sed 's/=.*//' $(cnf))
+ifeq (,$(wildcard ".env"))
+	include $(cnf)
+	export $(shell sed 's/=.*//' $(cnf))
+endif
+
+# HIDDEN
+print-%: ##  Print env var names and values
+	@echo $* = $($*)
+echo-%: ##  Print any environment variable
+	@echo $($*)
 
 # HELP
 # This will output the help for each task
@@ -12,6 +21,9 @@ help: ## Print all commands and help info
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .DEFAULT_GOAL := help
+
+envs:  ## Source env file if you are running local
+	./env.sh
 
 bump-major:  ## Bump the major version tag
 	./bump_major.sh
