@@ -37,8 +37,10 @@ bump-patch:  ## Bump the patch version tag
 bump-build:  ## Bump the build version to a random build number
 	./bump_build.sh
 
-run_release:  ## Run release image locally
+run-release:  ## Run release image locally
 	./docker_run.sh
+
+images: build-push-bins build-push-release  ## Build and push binaries, build and push release image
 
 build-push-bins: bake-bin-arm bake-bin-amd push  ## Bake and push binary images
 

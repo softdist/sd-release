@@ -93,9 +93,6 @@ jobs:
       - name: Build Docker Images
         run: make images
 
-      - name: Push Docker Images
-        run: make push
-
   release:
     name: Create GitHub Release
     needs: [bump-version-and-tag, docker-build]
