@@ -17,25 +17,26 @@ WORKDIR /build
 RUN --mount=type=secret,id=TRUSTED_CERT,env=TRUSTED_CERT \
     echo "$TRUSTED_CERT" > $certs/trusted_certs.pem
 
-RUN deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target aarch64-apple-darwin --no-check  --output /app/aarch64-apple-darwin/run run.ts && \
-    deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target aarch64-apple-darwin --output /app/aarch64-apple-darwin/install installer.ts && \
-    deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target aarch64-apple-darwin --output /app/aarch64-apple-darwin/extricate extricate.ts
+RUN deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target aarch64-apple-darwin --no-check  --output /app/aarch64-apple-darwin/sd-run src/sd-run.ts && \
+    deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target aarch64-apple-darwin --output /app/aarch64-apple-darwin/sd-install src/sd-install.ts && \
+    deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target aarch64-apple-darwin --output /app/aarch64-apple-darwin/sd-extricate src/sd-extricate.ts
 
-RUN deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-apple-darwin --no-check --output /app/x86_64-apple-darwin/run run.ts && \
-    deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-apple-darwin --output /app/x86_64-apple-darwin/install installer.ts && \
-    deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-apple-darwin --output /app/x86_64-apple-darwin/extricate extricate.ts
+RUN deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-apple-darwin --no-check --output /app/x86_64-apple-darwin/sd-run src/sd-run.ts && \
+    deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-apple-darwin --output /app/x86_64-apple-darwin/sd-install src/sd-install.ts && \
+    deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-apple-darwin --output /app/x86_64-apple-darwin/sd-extricate src/sd-extricate.ts
 
-# RUN deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target aarch64-unknown-linux-gnu --no-check  --output /app/aarch64-unknown-linux-gnu/run run.ts && \
-#     deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target aarch64-unknown-linux-gnu --output /app/aarch64-unknown-linux-gnu/install installer.ts && \
-#     deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target aarch64-unknown-linux-gnu --output /app/aarch64-unknown-linux-gnu/extricate extricate.ts
+ RUN deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target aarch64-unknown-linux-gnu --no-check  --output /app/aarch64-unknown-linux-gnu/sd-run src/sd-run.ts && \
+     deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target aarch64-unknown-linux-gnu --output /app/aarch64-unknown-linux-gnu/sd-install src/sd-install.ts && \
+     deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target aarch64-unknown-linux-gnu --output /app/aarch64-unknown-linux-gnu/sd-extricate src/sd-extricate.ts
 
-# RUN deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-unknown-linux-gnu --no-check --output /app/x86_64-unknown-linux-gnu/run run.ts && \
-#     deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-unknown-linux-gnu --output /app/x86_64-unknown-linux-gnu/install installer.ts && \
-#     deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-unknown-linux-gnu --output /app/x86_64-unknown-linux-gnu/extricate extricate.ts
+ RUN deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-unknown-linux-gnu --no-check --output /app/x86_64-unknown-linux-gnu/sd-run src/sd-run.ts && \
+     deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-unknown-linux-gnu --output /app/x86_64-unknown-linux-gnu/sd-install src/sd-install.ts && \
+     deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-unknown-linux-gnu --output /app/x86_64-unknown-linux-gnu/sd-extricate src/sd-extricate.ts
 
-# RUN deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-pc-windows-msvc --no-check --output /app/x86_64-pc-windows-msvc/run run.ts && \
-#     deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-pc-windows-msvc --output /app/x86_64-pc-windows-msvc/install installer.ts && \
-#     deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-pc-windows-msvc --output /app/x86_64-pc-windows-msvc/extricate extricate.ts
+ RUN deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-pc-windows-msvc --no-check --output /app/x86_64-pc-windows-msvc/sd-run src/sd-run.ts && \
+     deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-pc-windows-msvc --output /app/x86_64-pc-windows-msvc/sd-install src/sd-install.ts && \
+     deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --allow-sys --target x86_64-pc-windows-msvc --output /app/x86_64-pc-windows-msvc/sd-extricate src/sd-extricate.ts
+
 RUN chmod -R 0660 /app
 WORKDIR /app
 RUN tar -cvf ../release.tar .
@@ -44,7 +45,7 @@ RUN tar -cvf ../release.tar .
 # Lightweight binary image
 FROM gcr.io/distroless/base-debian12
 WORKDIR /app
-#RUN apt-get update && apt-get install -y docker.io
+
 COPY .semver.version.tag .
 COPY .semver.commit.tag .
 COPY --from=builder-run /release.tar /app/release.tar

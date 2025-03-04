@@ -50,10 +50,10 @@ push:  ## Push Images to the docker registry
 	./docker_push.sh
 
 bake-release:  ## Create Bake Release Image
-	env TRUSTED_CERT=$(TRUSTED_CERT) ./docker_bake_release.sh
+	./docker_bake_release.sh
 
 bake-bin-arm:  ## Create Bake Bin ARM Image
-	env TRUSTED_CERT=$(TRUSTED_CERT) ./docker_bake_arm.sh
+	./docker_bake_arm.sh
 
 bake-bin-amd:  ## Create Bake Bin AMD Image
-	env TRUSTED_CERT=$(TRUSTED_CERT) ./docker_bake_amd.sh
+	./docker_bake_amd.sh

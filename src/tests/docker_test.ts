@@ -1,5 +1,5 @@
 import { assertEquals, assertRejects } from "jsr:@std/assert"
-import { containerStart, containerLogs, imageCreate } from "../run.ts";
+import { containerStart, containerLogs, imageCreate } from "../sd-run.ts";
 
 // Mock Docker API Client
 class MockDockerClient {

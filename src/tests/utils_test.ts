@@ -1,5 +1,5 @@
 import { assertEquals } from "jsr:@std/assert";
-import { getPlatform, getAuth } from "../run.ts";
+import { getPlatform, getAuth } from "../sd-run.ts";
 
 // Mock System Environment
 Deno.env.set("DENO_VERSION", "1.40.0");

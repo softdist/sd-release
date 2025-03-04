@@ -1,0 +1,96 @@
+name: Build and Release Deno Binaries
+
+# on:
+#     push:
+#       branches:
+#         - main
+on:
+ push:
+   tags:
+     - 'v*'  # Runs only on version tags like v1.0.0
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            suffix: linux-amd64
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            suffix: linux-arm64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            suffix: darwin-amd64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            suffix: darwin-arm64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            suffix: windows-amd64
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
+            suffix: windows-arm64
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Compile Deno Binaries
+        run: |
+          deno compile --allow-all --target=${{ matrix.target }} --output sd-run-${{ matrix.suffix }} ./src/sd-run.ts
+          deno compile --allow-all --target=${{ matrix.target }} --output sd-install-${{ matrix.suffix }} ./src/sd-install.ts
+          deno compile --allow-all --target=${{ matrix.target }} --output sd-explicate-${{ matrix.suffix }} ./src/sd-explicate.ts
+
+      - name: Upload Binaries as Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: deno-binaries-${{ matrix.suffix }}
+          path: |
+            sd-run-${{ matrix.suffix }}
+            sd-install-${{ matrix.suffix }}
+            sd-explicate-${{ matrix.suffix }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download All Compiled Binaries
+        uses: actions/download-artifact@v3
+
+      - name: Set Executable Permissions (Linux/Mac)
+        if: runner.os != 'Windows'
+        run: chmod +x deno-binaries-*/sd-*
+
+      - name: Upload Binaries to Different Repository Release
+        env:
+          GH_TOKEN: ${{ secrets.TARGET_REPO_TOKEN }}
+        run: |
+          RELEASE_TAG=${{ github.ref_name }}
+          TARGET_REPO="softdist/docker.client"
+
+          # Get latest release ID or create one
+          RELEASE_ID=$(gh api repos/$TARGET_REPO/releases --jq "map(select(.tag_name == \"$RELEASE_TAG\")) | .[0].id")
+
+          if [ -z "$RELEASE_ID" ]; then
+            echo "Creating a new release..."
+            RESPONSE=$(gh api repos/$TARGET_REPO/releases \
+              -X POST \
+              -F tag_name="$RELEASE_TAG" \
+              -F name="$RELEASE_TAG" \
+              -F draft=false \
+              -F prerelease=false)
+            RELEASE_ID=$(echo "$RESPONSE" | jq .id)
+          fi
+
+          # Upload each file to the release
+          for file in deno-binaries-*/sd-*; do
+            gh release upload $RELEASE_TAG "$file" --repo $TARGET_REPO
+          done

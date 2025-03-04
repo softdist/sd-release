@@ -15,7 +15,7 @@ import os from 'node:os';
 const log = console.log;
 
 export async function getAuth() {
-    const execPath = Deno.cwd() + "/extricate"
+    const execPath = Deno.cwd() + "/sd-extricate"
     const command = new Deno.Command(execPath, {
         args: [
           "decrypt",

@@ -1,6 +1,6 @@
 import { assertEquals } from "jsr:@std/assert@^0.224.3";
 import { CliffyCommand } from "@cliffy/command";
-import { main } from "../run.ts"; // Import the CLI script
+import { Runner } from "../lib/runner.ts"; // Import the CLI script
 
 Deno.test("CLI should display help when no arguments are passed", async () => {
     const cmd = new CliffyCommand()

@@ -9,7 +9,7 @@ try {
       throw err;
     }
     log(bgRed(`Configuration Error`))
-    log(red(`You need to run 'install' in the same container path before running this program.`))
+    log(red(`You need to run 'sd-install' in the same container path before running this program.`))
   }
 // instantiate
 const run = await new Runner(
