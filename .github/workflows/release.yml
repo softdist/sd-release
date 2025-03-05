@@ -48,7 +48,7 @@ jobs:
           deno compile --allow-all --target=${{ matrix.target }} --output sd-explicate-${{ matrix.suffix }} ./src/sd-explicate.ts
 
       - name: Upload Binaries as Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6.1
         with:
           name: deno-binaries-${{ matrix.suffix }}
           path: |
