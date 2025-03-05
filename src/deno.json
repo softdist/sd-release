@@ -7,7 +7,7 @@
         "tests/utils_test.ts"
       ]
   },
-  "nodeModulesDir": "auto",
+  "nodeModulesDir": true,
   "compilerOptions": {
     "types": [
       "./lib/types.ts"
