@@ -28,16 +28,16 @@ jobs:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             suffix: windows-amd64
- #         - os: windows-latest
- #           target: aarch64-pc-windows-msvc
- #           suffix: windows-arm64
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
+            suffix: windows-arm64
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Install Deno
-        uses: denoland/setup-deno@v1
+        uses: denoland/setup-deno@v2.0.2
         with:
           deno-version: v1.x
 
