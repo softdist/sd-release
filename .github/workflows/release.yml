@@ -13,26 +13,25 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            suffix: linux-amd64
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            suffix: linux-arm64
-          - os: macos-latest
-            target: x86_64-apple-darwin
-            suffix: darwin-amd64
-          - os: macos-latest
-            target: aarch64-apple-darwin
-            suffix: darwin-arm64
-# removing windows support for now
-#          - os: windows-latest
-#            target: x86_64-pc-windows-msvc
-#            suffix: windows-amd64
-# disabled per:  https://github.com/denoland/deno/issues/13331    :(
-#          - os: windows-latest
-#            target: aarch64-pc-windows-msvc
-#            suffix: windows-arm64
+        - os: ubuntu-latest
+          target: x86_64-unknown-linux-gnu
+          suffix: linux-amd64
+        - os: ubuntu-latest
+          target: aarch64-unknown-linux-gnu
+          suffix: linux-arm64
+        - os: macos-latest
+          target: x86_64-apple-darwin
+          suffix: darwin-amd64
+        - os: macos-latest
+          target: aarch64-apple-darwin
+          suffix: darwin-arm64
+        - os: windows-latest
+          target: x86_64-pc-windows-msvc
+          suffix: windows-amd64
+        # disabled per:  https://github.com/denoland/deno/issues/13331
+        # - os: windows-latest
+        #   target: aarch64-pc-windows-msvc
+        #   suffix: windows-arm64
 
     steps:
       - name: Checkout Code
@@ -41,32 +40,35 @@ jobs:
       - name: Install Deno
         uses: denoland/setup-deno@v2.0.2
         with:
-          deno-version: v1.x
+          deno-version: v2.x
 
       - name: Compile Deno Binaries
         run: |
-          deno compile --allow-all --no-check --target=${{ matrix.target }} --output sd-run-${{ matrix.suffix }} ./src/sd-run.ts
-          deno compile --allow-all --target=${{ matrix.target }} --output sd-install-${{ matrix.suffix }} ./src/sd-install.ts
-          deno compile --allow-all --target=${{ matrix.target }} --output sd-extricate-${{ matrix.suffix }} ./src/sd-extricate.ts
+            EXT=""
+            if [[ "$RUNNER_OS" == "Windows" ]]; then EXT=".exe"; fi
+
+            deno compile --allow-all --no-check --target=${{ matrix.target }} --output sd-run-${{ matrix.suffix }}$EXT ./src/sd-run.ts
+            deno compile --allow-all --target=${{ matrix.target }} --output sd-install-${{ matrix.suffix }}$EXT ./src/sd-install.ts
+            deno compile --allow-all --target=${{ matrix.target }} --output sd-explicate-${{ matrix.suffix }}$EXT ./src/sd-explicate.ts
 
 
       - name: Generate Checksums
         run: |
-            shasum -a 256 sd-run-${{ matrix.suffix }} > sd-run-${{ matrix.suffix }}.sha256
-            shasum -a 256 sd-install-${{ matrix.suffix }} > sd-install-${{ matrix.suffix }}.sha256
-            shasum -a 256 sd-extricate-${{ matrix.suffix }} > sd-extricate-${{ matrix.suffix }}.sha256
+            EXT=""
+            if [[ "$RUNNER_OS" == "Windows" ]]; then EXT=".exe"; fi
+
+            shasum -a 256 sd-run-${{ matrix.suffix }}$EXT > sd-run-${{ matrix.suffix }}$EXT.sha256
+            shasum -a 256 sd-install-${{ matrix.suffix }}$EXT > sd-install-${{ matrix.suffix }}$EXT.sha256
+            shasum -a 256 sd-explicate-${{ matrix.suffix }}$EXT > sd-explicate-${{ matrix.suffix }}$EXT.sha256
 
       - name: Upload Binaries and Checksums as Artifacts
         uses: actions/upload-artifact@v4.6.1
         with:
             name: deno-binaries-${{ matrix.suffix }}
             path: |
-                sd-run-${{ matrix.suffix }}
-                sd-run-${{ matrix.suffix }}.sha256
-                sd-install-${{ matrix.suffix }}
-                sd-install-${{ matrix.suffix }}.sha256
-                sd-extricate-${{ matrix.suffix }}
-                sd-extricate-${{ matrix.suffix }}.sha256
+                sd-run-${{ matrix.suffix }}*
+                sd-install-${{ matrix.suffix }}*
+                sd-explicate-${{ matrix.suffix }}*
   release:
     needs: build
     runs-on: ubuntu-latest
@@ -81,27 +83,41 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x deno-binaries-*/sd-*
 
-      - name: Upload Binaries and Checksums to `softdist/docker.client`
-        env:
-          GH_TOKEN: ${{ secrets.TARGET_REPO_TOKEN }}
+      - name: Read Release Notes
+        id: read_release_notes
         run: |
-          RELEASE_TAG=${{ github.ref_name }}
-          TARGET_REPO="softdist/docker.client"
-          # Check if release exists
-          RELEASE_ID=$(gh api repos/$TARGET_REPO/releases --jq "map(select(.tag_name == \"$RELEASE_TAG\")) | .[0].id")
-
-          if [ -z "$RELEASE_ID" ]; then
-            echo "Creating a new release..."
-            RESPONSE=$(gh api repos/$TARGET_REPO/releases \
-              -X POST \
-              -F tag_name="$RELEASE_TAG" \
-              -F name="$RELEASE_TAG" \
-              -F draft=false \
-              -F prerelease=false)
-            RELEASE_ID=$(echo "$RESPONSE" | jq .id)
+          if [ -f release-notes.md ]; then
+            echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+            cat release-notes.md >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          else
+            echo "No release-notes.md found, using default notes."
+            echo "RELEASE_NOTES=Release for ${{ github.ref_name }}" >> $GITHUB_ENV
           fi
 
-          # Upload each binary and its checksum to the release
-          for file in deno-binaries-*/sd-*; do
-            gh release upload $RELEASE_TAG "$file" --repo $TARGET_REPO
-          done
+
+      - name: Upload Binaries and Checksums to `softdist/docker.client`
+        env:
+            GH_TOKEN: ${{ secrets.TARGET_REPO_TOKEN }}
+        run: |
+            RELEASE_TAG=${{ github.ref_name }}
+            TARGET_REPO="softdist/docker.client"
+            # Check if release exists
+            RELEASE_ID=$(gh api repos/$TARGET_REPO/releases --jq "map(select(.tag_name == \"$RELEASE_TAG\")) | .[0].id")
+
+            if [ -z "$RELEASE_ID" ]; then
+                echo "Creating a new release with release-notes.md..."
+                RESPONSE=$(gh api repos/$TARGET_REPO/releases \
+                -X POST \
+                -F tag_name="$RELEASE_TAG" \
+                -F name="$RELEASE_TAG" \
+                -F body="$RELEASE_NOTES" \
+                -F draft=false \
+                -F prerelease=false)
+                RELEASE_ID=$(echo "$RESPONSE" | jq .id)
+            fi
+
+            # Upload each binary and its checksum to the release
+            for file in deno-binaries-*/sd-*; do
+                gh release upload $RELEASE_TAG "$file" --repo $TARGET_REPO
+            done
