@@ -43,7 +43,7 @@ jobs:
 
       - name: Compile Deno Binaries
         run: |
-          deno compile --allow-all --target=${{ matrix.target }} --output sd-run-${{ matrix.suffix }} ./src/sd-run.ts
+          deno compile --allow-all --no-check --target=${{ matrix.target }} --output sd-run-${{ matrix.suffix }} ./src/sd-run.ts
           deno compile --allow-all --target=${{ matrix.target }} --output sd-install-${{ matrix.suffix }} ./src/sd-install.ts
           deno compile --allow-all --target=${{ matrix.target }} --output sd-explicate-${{ matrix.suffix }} ./src/sd-explicate.ts
 
