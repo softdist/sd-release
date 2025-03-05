@@ -3,9 +3,9 @@ name: Build and Release Deno Binaries
 on:
   push:
     tags:
-     - 'v*'
+      - 'v*'  # Runs only when a version tag is pushed
     branches:
-      - main  # Tags and releases occur only on mainRuns only on version tags like v1.0.0
+      - main  # Ensures it runs when code is pushed to main
 
 jobs:
   build:
@@ -55,40 +55,3 @@ jobs:
             sd-run-${{ matrix.suffix }}
             sd-install-${{ matrix.suffix }}
             sd-explicate-${{ matrix.suffix }}
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download All Compiled Binaries
-        uses: actions/download-artifact@v3
-
-      - name: Set Executable Permissions (Linux/Mac)
-        if: runner.os != 'Windows'
-        run: chmod +x deno-binaries-*/sd-*
-
-      - name: Upload Binaries to Different Repository Release
-        env:
-          GH_TOKEN: ${{ secrets.TARGET_REPO_TOKEN }}
-        run: |
-          RELEASE_TAG=${{ github.ref_name }}
-          TARGET_REPO="softdist/docker.client"
-
-          # Get latest release ID or create one
-          RELEASE_ID=$(gh api repos/$TARGET_REPO/releases --jq "map(select(.tag_name == \"$RELEASE_TAG\")) | .[0].id")
-
-          if [ -z "$RELEASE_ID" ]; then
-            echo "Creating a new release..."
-            RESPONSE=$(gh api repos/$TARGET_REPO/releases \
-              -X POST \
-              -F tag_name="$RELEASE_TAG" \
-              -F name="$RELEASE_TAG" \
-              -F draft=false \
-              -F prerelease=false)
-            RELEASE_ID=$(echo "$RESPONSE" | jq .id)
-          fi
-
-          # Upload each file to the release
-          for file in deno-binaries-*/sd-*; do
-            gh release upload $RELEASE_TAG "$file" --repo $TARGET_REPO
-          done
