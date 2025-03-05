@@ -48,11 +48,59 @@ jobs:
           deno compile --allow-all --target=${{ matrix.target }} --output sd-install-${{ matrix.suffix }} ./src/sd-install.ts
           deno compile --allow-all --target=${{ matrix.target }} --output sd-extricate-${{ matrix.suffix }} ./src/sd-extricate.ts
 
-      - name: Upload Binaries as Artifacts
+
+      - name: Generate Checksums
+        run: |
+            shasum -a 256 sd-run-${{ matrix.suffix }} > sd-run-${{ matrix.suffix }}.sha256
+            shasum -a 256 sd-install-${{ matrix.suffix }} > sd-install-${{ matrix.suffix }}.sha256
+            shasum -a 256 sd-extricate-${{ matrix.suffix }} > sd-extricate-${{ matrix.suffix }}.sha256
+
+      - name: Upload Binaries and Checksums as Artifacts
         uses: actions/upload-artifact@v4.6.1
         with:
-          name: deno-binaries-${{ matrix.suffix }}
-          path: |
-            sd-run-${{ matrix.suffix }}
-            sd-install-${{ matrix.suffix }}
-            sd-explicate-${{ matrix.suffix }}
+            name: deno-binaries-${{ matrix.suffix }}
+            path: |
+                sd-run-${{ matrix.suffix }}
+                sd-run-${{ matrix.suffix }}.sha256
+                sd-install-${{ matrix.suffix }}
+                sd-install-${{ matrix.suffix }}.sha256
+                sd-extricate-${{ matrix.suffix }}
+                sd-extricate-${{ matrix.suffix }}.sha256
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4.2.2
+
+      - name: Download All Compiled Binaries
+        uses: actions/download-artifact@v4.1.9
+
+      - name: Set Executable Permissions (Linux/Mac)
+        if: runner.os != 'Windows'
+        run: chmod +x deno-binaries-*/sd-*
+
+      - name: Upload Binaries and Checksums to `softdist/docker.client`
+        env:
+          GH_TOKEN: ${{ secrets.TARGET_REPO_TOKEN }}
+        run: |
+          RELEASE_TAG=${{ github.ref_name }}
+          TARGET_REPO="softdist/docker.client"
+          # Check if release exists
+          RELEASE_ID=$(gh api repos/$TARGET_REPO/releases --jq "map(select(.tag_name == \"$RELEASE_TAG\")) | .[0].id")
+
+          if [ -z "$RELEASE_ID" ]; then
+            echo "Creating a new release..."
+            RESPONSE=$(gh api repos/$TARGET_REPO/releases \
+              -X POST \
+              -F tag_name="$RELEASE_TAG" \
+              -F name="$RELEASE_TAG" \
+              -F draft=false \
+              -F prerelease=false)
+            RELEASE_ID=$(echo "$RESPONSE" | jq .id)
+          fi
+
+          # Upload each binary and its checksum to the release
+          for file in deno-binaries-*/sd-*; do
+            gh release upload $RELEASE_TAG "$file" --repo $TARGET_REPO
+          done
