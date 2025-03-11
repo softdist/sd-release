@@ -57,9 +57,9 @@ jobs:
       - name: Generate Checksums
         run: |
 
-            shasum -a 256 sd-run-${{ matrix.suffix }}$EXT > sd-run-${{ matrix.suffix }}${{ matrix.fname }}.sha256
-            shasum -a 256 sd-install-${{ matrix.suffix }}$EXT > sd-install-${{ matrix.suffix }}${{ matrix.fname }}.sha256
-            shasum -a 256 sd-extricate-${{ matrix.suffix }}$EXT > sd-extricate-${{ matrix.suffix }}${{ matrix.fname }}.sha256
+            shasum -a 256 sd-run-${{ matrix.suffix }}${{ matrix.fname }} > sd-run-${{ matrix.suffix }}${{ matrix.fname }}.sha256
+            shasum -a 256 sd-install-${{ matrix.suffix }}${{ matrix.fname }} > sd-install-${{ matrix.suffix }}${{ matrix.fname }}.sha256
+            shasum -a 256 sd-extricate-${{ matrix.suffix }}${{ matrix.fname }} > sd-extricate-${{ matrix.suffix }}${{ matrix.fname }}.sha256
 
       - name: Upload Binaries and Checksums as Artifacts
         uses: actions/upload-artifact@v4.6.1
