@@ -16,18 +16,23 @@ jobs:
         - os: ubuntu-latest
           target: x86_64-unknown-linux-gnu
           suffix: linux-amd64
+          fname: ''
         - os: ubuntu-latest
           target: aarch64-unknown-linux-gnu
           suffix: linux-arm64
+          fname: ''
         - os: macos-latest
           target: x86_64-apple-darwin
           suffix: darwin-amd64
+          fname: ''
         - os: macos-latest
           target: aarch64-apple-darwin
           suffix: darwin-arm64
-        #- os: windows-latest
-        #  target: x86_64-pc-windows-msvc
-        #  suffix: windows-amd64
+          fname: ''
+        - os: windows-latest
+          target: x86_64-pc-windows-msvc
+          suffix: windows-amd64
+          fname: .exe
         # disabled per:  https://github.com/denoland/deno/issues/13331
         # - os: windows-latest
         #   target: aarch64-pc-windows-msvc
@@ -44,22 +49,17 @@ jobs:
 
       - name: Compile Deno Binaries
         run: |
-            EXT=""
-            if [[ "$RUNNER_OS" == "Windows" ]]; then EXT=".exe"; fi
-
-            deno compile --allow-all --no-check --target=${{ matrix.target }} --output sd-run-${{ matrix.suffix }}$EXT ./src/sd-run.ts
-            deno compile --allow-all --target=${{ matrix.target }} --output sd-install-${{ matrix.suffix }}$EXT ./src/sd-install.ts
-            deno compile --allow-all --target=${{ matrix.target }} --output sd-extricate-${{ matrix.suffix }}$EXT ./src/sd-extricate.ts
+            deno compile --allow-all --no-check --target=${{ matrix.target }} --output sd-run-${{ matrix.suffix }}${{ matrix.fname }} ./src/sd-run.ts
+            deno compile --allow-all --target=${{ matrix.target }} --output sd-install-${{ matrix.suffix }}${{ matrix.fname }} ./src/sd-install.ts
+            deno compile --allow-all --target=${{ matrix.target }} --output sd-extricate-${{ matrix.suffix }}${{ matrix.fname }} ./src/sd-extricate.ts
 
 
       - name: Generate Checksums
         run: |
-            EXT=""
-            if [[ "$RUNNER_OS" == "Windows" ]]; then EXT=".exe"; fi
 
-            shasum -a 256 sd-run-${{ matrix.suffix }}$EXT > sd-run-${{ matrix.suffix }}$EXT.sha256
-            shasum -a 256 sd-install-${{ matrix.suffix }}$EXT > sd-install-${{ matrix.suffix }}$EXT.sha256
-            shasum -a 256 sd-extricate-${{ matrix.suffix }}$EXT > sd-extricate-${{ matrix.suffix }}$EXT.sha256
+            shasum -a 256 sd-run-${{ matrix.suffix }}$EXT > sd-run-${{ matrix.suffix }}${{ matrix.fname }}.sha256
+            shasum -a 256 sd-install-${{ matrix.suffix }}$EXT > sd-install-${{ matrix.suffix }}${{ matrix.fname }}.sha256
+            shasum -a 256 sd-extricate-${{ matrix.suffix }}$EXT > sd-extricate-${{ matrix.suffix }}${{ matrix.fname }}.sha256
 
       - name: Upload Binaries and Checksums as Artifacts
         uses: actions/upload-artifact@v4.6.1
