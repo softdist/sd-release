@@ -8,7 +8,7 @@
         "tests/utils_test.ts"
       ]
   },
-  "nodeModulesDir": true,
+  "nodeModulesDir": "auto",
   "compilerOptions": {
     "types": [
       "./lib/types.ts"
@@ -22,7 +22,7 @@
     "test": "deno test -A --unstable",
     "generate": "npx @openapitools/openapi-generator-cli generate -g typescript -i ./schema/v1.47.yaml -o ./spec/",
     "publish": "deno task generate && deno run -A ./scripts/build_npm.ts 0.1.2 && cd npm && npm publish",
-    "build": "deno run --allow-all make_version.ts && deno compile --output dist/myapp src/main.ts"
+    "build": "deno run --allow-all make_version.ts"
   },
   "imports": {
     "@deno/dnt": "jsr:@deno/dnt@^0.41.2",

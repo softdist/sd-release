@@ -49,7 +49,7 @@ jobs:
 
             deno compile --allow-all --no-check --target=${{ matrix.target }} --output sd-run-${{ matrix.suffix }}$EXT ./src/sd-run.ts
             deno compile --allow-all --target=${{ matrix.target }} --output sd-install-${{ matrix.suffix }}$EXT ./src/sd-install.ts
-            deno compile --allow-all --target=${{ matrix.target }} --output sd-explicate-${{ matrix.suffix }}$EXT ./src/sd-explicate.ts
+            deno compile --allow-all --target=${{ matrix.target }} --output sd-extricate-${{ matrix.suffix }}$EXT ./src/sd-extricate.ts
 
 
       - name: Generate Checksums
@@ -59,7 +59,7 @@ jobs:
 
             shasum -a 256 sd-run-${{ matrix.suffix }}$EXT > sd-run-${{ matrix.suffix }}$EXT.sha256
             shasum -a 256 sd-install-${{ matrix.suffix }}$EXT > sd-install-${{ matrix.suffix }}$EXT.sha256
-            shasum -a 256 sd-explicate-${{ matrix.suffix }}$EXT > sd-explicate-${{ matrix.suffix }}$EXT.sha256
+            shasum -a 256 sd-extricate-${{ matrix.suffix }}$EXT > sd-extricate-${{ matrix.suffix }}$EXT.sha256
 
       - name: Upload Binaries and Checksums as Artifacts
         uses: actions/upload-artifact@v4.6.1
@@ -68,7 +68,7 @@ jobs:
             path: |
                 sd-run-${{ matrix.suffix }}*
                 sd-install-${{ matrix.suffix }}*
-                sd-explicate-${{ matrix.suffix }}*
+                sd-extricate-${{ matrix.suffix }}*
   release:
     needs: build
     runs-on: ubuntu-latest
