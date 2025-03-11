@@ -100,7 +100,8 @@ jobs:
         env:
             GH_TOKEN: ${{ secrets.TARGET_REPO_TOKEN }}
         run: |
-            RELEASE_TAG=${{ github.ref_name }}
+            echo "GIT_TAG=`echo $(git describe --tags --abbrev=0)`" >> $GITHUB_ENV
+            RELEASE_TAG=${{ steps.version_bump.outputs.release_tag }}
             TARGET_REPO="softdist/docker.client"
             # Check if release exists
             RELEASE_ID=$(gh api repos/$TARGET_REPO/releases --jq "map(select(.tag_name == \"$RELEASE_TAG\")) | .[0].id")
