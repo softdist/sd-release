@@ -79,7 +79,7 @@ export class DockerClient {
 
       return response;
     } catch (error) {
-      console.error(`Request failed: ${error.message}`);
+      console.error(`Request failed: ${error}`);
       throw error;
     }
   }

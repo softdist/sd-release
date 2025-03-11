@@ -1,7 +1,7 @@
 import { Command as CliffyCommand } from "jsr:@cliffy/command@^1.0.0-rc.7";
 import { encodeBase64 } from 'jsr:@std/encoding@^0.224.3';
 import { md5 } from "jsr:@takker/md5";
-import { bgRed, bgBrightCyan, bgGreen, red, blue, gray, green, bgBrightYellow, bgBlue } from "jsr:@std/fmt@~1.0.2/colors";
+import { bgRed, bgBrightCyan, bgGreen, red, blue, gray, green, bgBrightYellow, bgBlue, yellow } from "jsr:@std/fmt@~1.0.2/colors";
 import replace from "npm:@stdlib/string-replace"
 import type { TimeStampDetails, ImageCreateResponse, ImageCreateData, ContainerCreateData } from "./types.ts";
 import type { HostConfig, ContainerExecData, ContainerLogsResponse, ContainerStartResponse, ContainerStartData, ContainerLogsData } from "./types.ts";
@@ -10,12 +10,13 @@ import { _DockerClient } from './client.ts';
 import { DockerResponse } from './connection.ts';
 import { AsyncLock } from "@olli/async-lock";
 import os from 'node:os';
+import { generatedVersion } from "../version.ts";
 
 // primary
 const log = console.log;
 
 export async function getAuth() {
-    const execPath = Deno.cwd() + "/sd-extricate"
+    const execPath = "sd-extricate"
     const command = new Deno.Command(execPath, {
         args: [
           "decrypt",
@@ -35,6 +36,7 @@ export class Runner {
     private os: Map<string, string>;
     private sys: Map<string, string>;
     private time : TimeStampDetails;
+    private isAttached: boolean = false;
     private timeString: string;
     private md5hash: string;
     public static getPlatform() {
@@ -236,10 +238,6 @@ export class Runner {
         }
     }
 
-    private async containerAttach(containerId: string, cmd: string) {
-        await new Command("docker", ["exec", "-it", containerId, cmd]).run();
-    }
-
     private async checkContainerStatus(containerId: string) {
         const client = await this.client2();
         const containerInfo = await client.request({
@@ -252,16 +250,6 @@ export class Runner {
         }
     }
 
-    // private async containerTryStart(id: string) {
-    //     try {
-    //         const start = await this.containerStart({
-    //         id: `${id}`
-    //         });
-    //         return start
-    //     } catch (error) {
-    //         log(red("Error:" + error));
-    //     }
-    // }
     private async apiContainerExec(data: ContainerExecData): Promise<DockerResponse<ContainerExecData>> {
         const client = await this.client2();
         return client.request({
@@ -485,8 +473,8 @@ export class Runner {
     })
 
     await new CliffyCommand()
-    .name("Static Docker Client")
-    .version(await Deno.readTextFile('./.semver.version.tag'))
+    .name("SoftDist Runtime")
+    .version(`${generatedVersion}`)
     .globalOption("-d, --debug", "Enable debug output.")
     .description("Decrypt a result set using the same key and IV data, and provide it to standard out for piping to other commands.")
     // main command

@@ -1,4 +1,6 @@
-import { Command, EnumType } from "@cliffy/command";
+import { Command } from "@cliffy/command";
+import { generatedVersion } from "./version.ts";
+import os from 'node:os';
 type Results = {
   username: string;
   registry: string;
@@ -10,7 +12,7 @@ type Files = {
   cwdir: string;
 };
 
-async function decryptAndRetrieve(keyFile: string, dataFile: string, dirName: string): Promise<any[]> {
+async function decryptAndRetrieve(keyFile: string, dataFile: string, dirName: string): Promise<Results[]> {
   // Read the key and IV from the file
   const keys = await Deno.readTextFile(`${dirName}/${keyFile}`);
   const data = await Deno.readTextFile(`${dirName}/${dataFile}`);
@@ -49,10 +51,11 @@ async function testPath(dir: string, file: string) {
     console.log("File is missing", `${dir}/${file}`);
   }
 }
-const defaults: Files = { keys: `.sha`, vault: `.enc`, cwdir: Deno.cwd() }
+const defaults: Files = { keys: `.sha`, vault: `.enc`, cwdir: os.homedir() + '/.config/.devops' };
 const command = new Command()
   .name("Extricate")
-  .version("0.1.0")
+  .version(generatedVersion)
+    .description("Encrypt and decrypt secrets in & out of containers.")
   .globalOption("-d, --debug", "Enable debug output.")
   .description("Decrypt a result set using the same key and IV data, and provide it to standard out for piping to other commands.")
   // main command

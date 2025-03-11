@@ -1,15 +1,19 @@
 import { Runner } from "./lib/runner.ts"
-import { red, bgRed } from "jsr:@std/fmt@~1.0.2/colors";
+import { white, bgRed } from "jsr:@std/fmt@~1.0.2/colors";
+import os from 'node:os';
+
 const log = console.log;
 const cwd = Deno.cwd();
+const homedir = os.homedir() + '/.config/.devops';
+
 try {
-    await Deno.lstat(`${cwd}/.config.location`);
+    await Deno.lstat(`${homedir}/.config.location`);
   } catch (err) {
     if (!(err instanceof Deno.errors.NotFound)) {
       throw err;
     }
-    log(bgRed(`Configuration Error`))
-    log(red(`You need to run 'sd-install' in the same container path before running this program.`))
+    log(bgRed(`Missing Configuration [Files] | This is normal for first time users.`))
+    log(white(`Please run 'sd-install' to create a configuration file.`))
   }
 // instantiate
 const run = await new Runner(
@@ -18,8 +22,9 @@ const run = await new Runner(
         ['default_parent', 'run.parent'],
         ['default_child', 'run.child'],
         ['default_socket', '/var/run/docker.sock'],
-        ['default_dir', `${cwd}`],
-        ['default_location', await Deno.readTextFile( `${cwd}/.config.location` )]
+        ['default_dir', `${homedir}`],
+        ['default_cwd', `${cwd}`],
+        ['default_location', await Deno.readTextFile( `${homedir}/.config.location` )]
     ]
 );
 

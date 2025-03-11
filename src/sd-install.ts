@@ -1,4 +1,6 @@
-import { Checkbox, Confirm, Input, Number, Toggle, Select, Secret, prompt } from "@cliffy/prompt";
+import { Input, Toggle, Select, Secret, prompt } from "@cliffy/prompt";
+import os from 'node:os';
+import { generatedVersion } from "./version.ts";
 
 type Results = {
     username: string;
@@ -39,6 +41,7 @@ async function encryptAndSave(results: Results[], keyFile: string, dataFile: str
 
 
 async function main() {
+const homeDir = os.homedir() + '/.config/.devops'
 const dirName = Deno.cwd();
 const multiLineYaml = `secrets:
   storage:
@@ -68,7 +71,6 @@ globals:
     - "github"
     - "GITHUB_TOKEN"
 `;
-const version = await Deno.readTextFile("./.semver.version.tag");
 const multiLineIntro = `
 
     ▗▄▄▖ ▗▄▖ ▗▄▄▄▖▗▄▄▄▖    ▗▄▄▄ ▗▄▄▄▖ ▗▄▄▖▗▄▄▄▖
@@ -76,10 +78,8 @@ const multiLineIntro = `
      ▝▀▚▖▐▌ ▐▌▐▛▀▀▘  █      ▐▌  █  █   ▝▀▚▖  █
     ▗▄▄▞▘▝▚▄▞▘▐▌     █      ▐▙▄▄▀▗▄█▄▖▗▄▄▞▘  █
 
-        Mckesson Software Distribution:
-                DevOps Team
-                v${version}
-
+      a Runtime Client for Docker Containers
+             ${generatedVersion}
 
 
 `;
@@ -122,7 +122,7 @@ const result = await prompt([{
         after: async ({ specifyloc }, next) => { // executed after like prompt
             if (specifyloc) {
                // write the location
-              await Deno.writeTextFile(`${dirName}/config.location`, specifyloc );
+              await Deno.writeTextFile(`${homeDir}/config.location`, specifyloc );
               await next("credentials");
             } else {
               console.log( "You must specify a file location" )
@@ -141,8 +141,8 @@ const result = await prompt([{
               await next();
             } else {
               // write config yaml to default location
-              await Deno.writeTextFile(`${dirName}/.config.location`, `${dirName}/.config.yaml` );
-              await Deno.writeTextFile(`${dirName}/.config.yaml`, multiLineYaml);
+              await Deno.writeTextFile(`${homeDir}/.config.location`, `${homeDir}/.config.yaml` );
+              await Deno.writeTextFile(`${homeDir}/.config.yaml`, multiLineYaml);
               await next();
             }
         },
@@ -200,7 +200,7 @@ const row: Results = {
   registry: result.registry!,
   password: result.password!
 };
-await encryptAndSave([row], ".sha", ".enc", Deno.cwd());
+await encryptAndSave([row], ".sha", ".enc", homeDir);
 //console.log({ result })
 }
 
