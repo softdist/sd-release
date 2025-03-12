@@ -33,19 +33,19 @@ git-head:  ## Get the latest git tag
 	git tag -l | tail -n 1
 
 bump-major:  ## Bump the major version tag
-	./bump_major.sh
+	./scripts/bump_major.sh
 
 bump-minor:  ## Bump the minor version tag
-	./bump_minor.sh
+	./scripts/bump_minor.sh
 
 bump-patch:  ## Bump the patch version tag
-	./bump_patch.sh
+	./scripts/bump_patch.sh
 
 bump-build:  ## Bump the build version to a random build number
-	./bump_build.sh
+	./scripts/bump_build.sh
 
 run-release:  ## Run release image locally
-	./docker_run.sh
+	./scripts/docker_run.sh
 
 images: build-push-bins build-push-release  ## Build and push binaries, build and push release image
 
@@ -54,13 +54,13 @@ build-push-bins: bake-bin-arm bake-bin-amd push  ## Bake and push binary images
 build-push-release: bake-release push  ## Bake and push release image
 
 push:  ## Push Images to the docker registry
-	./docker_push.sh
+	./scripts/docker_push.sh
 
 bake-release:  ## Create Bake Release Image
-	./docker_bake_release.sh
+	./scripts/docker_bake_release.sh
 
 bake-bin-arm:  ## Create Bake Bin ARM Image
-	./docker_bake_arm.sh
+	./scripts/docker_bake_arm.sh
 
 bake-bin-amd:  ## Create Bake Bin AMD Image
-	./docker_bake_amd.sh
+	./scripts/docker_bake_amd.sh

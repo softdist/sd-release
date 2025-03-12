@@ -26,11 +26,11 @@ jobs:
           tag_prefix: "v"
           major_pattern: "#major"
           minor_pattern: "#minor"
+          version_format: "${major}.${minor}.${patch}-buildno${increment}"
           bump_each_commit: true
-          search_commit_body: true
-          search_commit_head: true  # Replaces search_commit_subject
-          namespace: "build"
           change_path: "."
+          bump_each_commit_patch_pattern: "#patch"
+          namespace: "build"
 
       - name: Print Version Info
         run: |
