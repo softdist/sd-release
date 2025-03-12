@@ -25,6 +25,13 @@ help: ## Print all commands and help info
 envs:  ## Source env file if you are running local
 	./env.sh
 
+
+downstream-tags:  ## Downstream:  List git tags
+	git -c 'versionsort.suffix=-' ls-remote --tags --sort='v:refname' https://github.com/softdist/docker.client.git
+
+git-head:  ## Get the latest git tag
+	git tag -l | tail -n 1
+
 bump-major:  ## Bump the major version tag
 	./bump_major.sh
 

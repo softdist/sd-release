@@ -100,7 +100,7 @@ jobs:
         env:
             GH_TOKEN: ${{ secrets.TARGET_REPO_TOKEN }}
         run: |
-            echo "GIT_TAG=`echo $(git describe --tags --abbrev=0)`" >> $GITHUB_ENV
+            GIT_TAG=`$(git tag -l | tail -n 1)`
             RELEASE_TAG=${{ steps.version_bump.outputs.release_tag }}
             TARGET_REPO="softdist/docker.client"
             # Check if release exists
