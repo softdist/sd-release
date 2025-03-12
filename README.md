@@ -1,17 +1,47 @@
 <!-- markdownlint-disable MD041 -->
 <!-- markdownlint-disable MD012 -->
-# @softdist/docker
+# SoftDist Releases
 
-The @softdist jsr.io scope is used to package the Lyns Docker Client!
+This is the SoftDist Release pipeline, it builds a bunch of binaries located in the [docker.client](https://github.com/softdist/docker.client) repository.
+This project is a full duplex docker task runner for the purpose of running container workloads as a service.
 
-* Based on @rainypixel but tailored for creating and attaching to containers
-* Also designed to run distrolss containers as scripted actions.
+* Originally this was roughly based on the @rainypixel [project for deno](https://jsr.io/@rainypixel/docker-api-ts/doc) but tailored for creating and attaching to containers.
+* Meant primarily for running these images:
+
+| Function | Description |
+| -------- | ----------- |
+| az | Azure CLI Container |
+| curl | CURL container |
+| fish | Fish language in a child container |
+| gh | Github CLI Container |
+| go | Go Language |
+| jfrog | JFROG CLI Container |
+| jq | JQ container |
+| node | NodeJS |
+| npm | Node Packages |
+| npx | Run Node Packages in-line |
+| openssl | OpenSSL CLI Container |
+| python3 | Python3 language and PIP |
+| volta | Volta CLI.  Yarn, NPM, Node, NPX, PNPM |
+| wget | WGET container |
+| yarn | Yarn CLI for NodeJS |
+| yq | YQ container |
+
+
+## How to run
+
+### Example 1
+
+Run the Github CLI:
+
+`sd-run child -i gh -- -h'
 
 # **Docker Bake**
 
 ## GitHub packager
 
 ### Package
+
 
 | Name | Purpose |
 | -- | -- |
@@ -21,6 +51,7 @@ The @softdist jsr.io scope is used to package the Lyns Docker Client!
 | sd-crypto | Unavailable currently.  In development.  Will be used for encryption using KeePass encrypted DBs |
 
 ### Program Commands
+
 
 | Command | Purpose |
 | -- | -- |
