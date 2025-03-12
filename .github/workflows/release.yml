@@ -32,9 +32,6 @@ jobs:
             suffix: windows-amd64
             fname: .exe
         # Disable Windows ARM for now
-        # - os: windows-latest
-        #   target: aarch64-pc-windows-msvc
-        #   suffix: windows-arm64
 
     steps:
       - name: Checkout Code
